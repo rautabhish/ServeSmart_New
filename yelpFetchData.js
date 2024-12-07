@@ -8,8 +8,8 @@ const fs = require('fs');
 
 const app = express();
 
-// Path to the secure connect bundle
-const secureConnectBundlePath = path.join(__dirname, 'config', 'secure-connect-smartserve.zip');
+// Path to the secure connect bundle (adjust for Heroku deployment)
+const secureConnectBundlePath = process.env.SECURE_CONNECT_BUNDLE_PATH || path.join(__dirname, 'config', 'secure-connect-smartserve.zip');
 
 // Initialize Cassandra client
 const client = new cassandra.Client({
@@ -78,13 +78,12 @@ async function fetchDataAndStore() {
 
 // Routes
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'signin.html'));
+    res.sendFile(path.join(__dirname, 'views', 'signin.html')); // Updated path to views folder
 });
 
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'views', 'dashboard.html')); // Updated path to views folder
 });
-
 
 app.post('/signup', async (req, res) => {
     const { username, password, pin, restaurantName } = req.body;
