@@ -1,7 +1,7 @@
 const express = require('express');
 const cassandra = require('cassandra-driver');
 const axios = require('axios');
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const portfinder = require('portfinder');
@@ -89,7 +89,7 @@ app.get('/dashboard', (req, res) => {
 
 app.post('/signup', async (req, res) => {
     const { username, password, pin, restaurantName } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
     const query = 'INSERT INTO users (username, password, pin, restaurant_name) VALUES (?, ?, ?, ?)';
     const params = [username, hashedPassword, pin, restaurantName];
     try {
@@ -107,7 +107,7 @@ app.post('/signin', async (req, res) => {
     try {
         const result = await client.execute(query, [username], { prepare: true });
         const user = result.rows[0];
-        if (user && await bcrypt.compare(password, user.password)) {
+        if (user && await bcryptjs.compare(password, user.password)) {
             res.json({ success: true });
         } else {
             res.json({ success: false, message: 'Invalid username or password.' });
