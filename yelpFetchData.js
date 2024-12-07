@@ -77,12 +77,9 @@ async function fetchDataAndStore() {
 }
 
 // Routes
+// Serve the index page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'signin.html')); // Updated path to views folder
-});
-
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'dashboard.html')); // Updated path to views folder
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.post('/signup', async (req, res) => {
