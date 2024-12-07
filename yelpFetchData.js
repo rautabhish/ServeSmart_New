@@ -4,28 +4,29 @@ const axios = require('axios');
 const bcryptjs = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const portfinder = require('portfinder');
+const fs = require('fs');
 
 const app = express();
 
-// Initialize the Cassandra client with AstraDB Secure Connect Bundle
+// Path to the secure connect bundle
+const secureConnectBundlePath = path.join(__dirname, 'config', 'secure-connect-smartserve.zip');
+
+// Initialize Cassandra client
 const client = new cassandra.Client({
     cloud: {
-        secureConnectBundle: process.env.ASTRA_DB_CREDENTIALS_PATH, // Use environment variable for path to secure connect bundle
+        secureConnectBundle: secureConnectBundlePath,
     },
-    credentials: {
-        username: process.env.ASTRA_DB_CLIENT_ID,
-        password: process.env.ASTRA_DB_CLIENT_SECRET,
-    },
-    keyspace: process.env.ASTRA_DB_KEYSPACE,
+    keyspace: 'smartserve', // Ensure this matches your AstraDB keyspace
 });
+
+console.log('Cassandra client initialized');
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Yelp API details
-const apiKey = process.env.YELP_API_KEY; // Use environment variable for Yelp API key
+const apiKey = process.env.YELP_API_KEY;
 const yelpSearchUrl = 'https://api.yelp.com/v3/businesses/search';
 const yelpReviewsUrl = (id) => `https://api.yelp.com/v3/businesses/${id}/reviews`;
 
@@ -36,23 +37,21 @@ async function fetchDataAndStore() {
 
         const response = await axios.get(yelpSearchUrl, {
             headers: { Authorization: `Bearer ${apiKey}` },
-            params: { location: 'Boston', categories: 'restaurants', limit: 5 }
+            params: { location: 'Boston', categories: 'restaurants', limit: 5 },
         });
 
         for (const business of response.data.businesses) {
             const reviewsResponse = await axios.get(yelpReviewsUrl(business.id), {
-                headers: { Authorization: `Bearer ${apiKey}` }
+                headers: { Authorization: `Bearer ${apiKey}` },
             });
 
-            const reviews = reviewsResponse.data.reviews.map(review => review.text);
+            const reviews = reviewsResponse.data.reviews.map((review) => review.text);
 
-            // Check if the restaurant already exists in the database
             const selectQuery = 'SELECT id FROM restaurant_info WHERE restaurant_name = ? ALLOW FILTERING';
             const selectParams = [business.name];
             const existingEntry = await client.execute(selectQuery, selectParams, { prepare: true });
 
             if (existingEntry.rowLength > 0) {
-                // Update existing restaurant entry
                 const updateQuery = `
                     UPDATE restaurant_info
                     SET ratings = ?, reviews = ?
@@ -62,7 +61,6 @@ async function fetchDataAndStore() {
                 await client.execute(updateQuery, updateParams, { prepare: true });
                 console.log(`Updated existing restaurant: ${business.name}`);
             } else {
-                // Insert new restaurant entry
                 const insertQuery = `
                     INSERT INTO restaurant_info (id, ratings, restaurant_name, reviews)
                     VALUES (?, ?, ?, ?)
@@ -80,12 +78,13 @@ async function fetchDataAndStore() {
 
 // Routes
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'signin.html'));
+    res.sendFile(path.join(__dirname, 'views', 'signin.html'));
 });
 
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    res.sendFile(path.join(__dirname, 'views', 'dashboard.html'));
 });
+
 
 app.post('/signup', async (req, res) => {
     const { username, password, pin, restaurantName } = req.body;
