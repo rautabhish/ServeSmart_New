@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Data Analysis</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f9fc;
+      color: #333;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .data-container {
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #444;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .buttons button {
+      padding: 12px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .buttons button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .analysis-result {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      white-space: pre-wrap;
+      margin-top: 10px;
+      line-height: 1.0;
+    }
+
+    .chart-container {
+      display: none;
+      max-width: 100%;
+      height: 300px;
+      margin-top: 15px;
+    }
+
+    .chart-container.active {
+      display: block;
+    }
+
+    .date-display {
+      text-align: right;
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 300px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #777;
+      background-color: #f1f1f1;
+      border-top: 1px solid #ddd;
+    }
+
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Typing Animation */
+    .loading-text {
+      font-size: 1.5em;
+      color: #333;
+      text-align: center;
+      padding-top: 20px;
+      font-family: 'Lora', serif;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      animation: typing 5s steps(50) 1s forwards,  step-end infinite;
+    }
+
+    @keyframes typing {
+      to {
+        width: 100%;
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        border-color: transparent;
+      }
+    }
+
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+  <!-- Typing text at the top -->
+  <div class="loading-text" id="loadingText">Welcome to SmartServe: Empowering Restaurants with Data</div>
+
+  <!-- Sign Out Button -->
+  <div class="buttons" style="justify-content: flex-end; margin-bottom: 10px;">
+    <button onclick="signOut()"> Sign Out ↪️</button>
+  </div>
+
+  <div class="data-container">
+    <div class="date-display" id="dateDisplay"></div>
+    <h3>Restaurant Data Analysis</h3>
+    <div class="buttons">
+      <button onclick="showRatingAnalysis()">Rating Analysis</button>
+      <button onclick="showSentimentAnalysis()">Sentiment Analysis</button>
+      <button onclick="showAreasToImprove()">Areas to Improve</button>
+      <button onclick="showMenuFeedback()">Menu Feedback</button>
+    </div>
+    <div id="analysisDisplay" class="analysis-result"></div>
+
+    <h3>POS Data Analysis</h3>
+    <div class="buttons">
+      <button id="mostSellingButton">Most Selling Item</button>
+      <button id="lessSellingButton">Less Selling Item</button>
+      <button id="expectedSalesDay">Expected Sales (Day)</button>
+      <button id="expectedSalesWeek">Expected Sales (Week)</button>
+      <button id="expectedSalesMonth">Expected Sales (Month)</button>
+    </div>
+    <div id="posAnalysisDisplay" class="analysis-result"></div>
+    <div id="chartContainer" class="chart-container">
+      <canvas id="posChart"></canvas>
+    </div>
+  </div>
+</div>
+
+
+<footer>
+  Powered by <a href="#">SmartServe</a>. All rights reserved.
+</footer>
+<script>
+  // Dynamic Date and Time Display
+  function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options);
+  }
+
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
+</script>
+<script>
+  function signOut() {
+    // Clear any session-related data if stored
+    sessionStorage.clear();
+    localStorage.clear();
+
+    // Redirect to index.html
+    window.location.href = "index.html";
+  }
+</script>
+
+<script src="analysisFunction.js"></script>
+<script src="posAnalysis.js"></script>
+</body>
+</html>
