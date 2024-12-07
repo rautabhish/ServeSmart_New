@@ -82,6 +82,21 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+app.get('/signin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'signin.html')); // Corrected path to signin.html
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'signup.html')); // Corrected path to signup.html
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'dashboard.html')); // Corrected path to dashboard.html
+});
+
+app.get('/restaurantData', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'restaurantData.html')); // Corrected path to restaurantData.html
+});
 app.post('/signup', async (req, res) => {
     const { username, password, pin, restaurantName } = req.body;
     const hashedPassword = await bcryptjs.hash(password, 10);
